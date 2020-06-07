@@ -4,7 +4,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="theme-color" content=#58b77a>
-  <title>Hello World | Yao的小博客</title>
+  <title>kafka伪集群配置 | Yao的小博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="author" content="Yao">
   <meta name="keywords" content="">
@@ -70,8 +70,8 @@
   <div class="page-title">
     <div class="avatar"><a href="/"><img src="/images/avatar.jpeg"></a></div>
     <span>2020-06-07</span>
-    <h2>Hello World</h2>
-    
+    <h2>kafka伪集群配置</h2>
+    <div class="tags"><i class="fa fa-tag"></i><a class="tag-link" href="/tags/kafka-%E4%BC%AA%E9%9B%86%E7%BE%A4/" rel="tag">-kafka -伪集群</a></div>
     </div>
 </div>
 </div>
@@ -80,19 +80,19 @@
   <div class="lx-post">
     <div class="lx-entry padding">
       <div>
-        <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
+        <h1 id="云服务器上配置kafka伪集群之坑"><a href="#云服务器上配置kafka伪集群之坑" class="headerlink" title="(云服务器上配置kafka伪集群之坑)"></a>(云服务器上配置kafka伪集群之坑)</h1><p>阿里云服务器上配置kafka伪集群之坑</p>
+<h2 id="下载kafka"><a href="#下载kafka" class="headerlink" title="下载kafka"></a>下载kafka</h2><p>下载后解压，然后将解压的kafka文件夹复制两份并重命名，如kafka1，kafka2，kafka3。</p>
+<a id="more"></a>
 
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/one-command-deployment.html" target="_blank" rel="noopener">Deployment</a></p>
+<h2 id="zookeeper-properties配置"><a href="#zookeeper-properties配置" class="headerlink" title="zookeeper.properties配置"></a>zookeeper.properties配置</h2><p><strong>本次使用kafka中自带zookeeper</strong><br>以kafka01为例，在kafka01文件夹下zookeeper.properties中添加和修改以下内容：<br>server.1=localhost:port1:port2（例如port1=2880，port2=3880，port4=2881，port5=3881，以此类推）<br>server.2=localhost:port3:port4<br>server.3=localhost:port5:port6</p>
+<p>dataDir=/root/kafka01/data/zookeeper（另两个文件需修改相应位置）<br>tickTime=2000<br>initLimit=10<br>syncLimit=5<br><strong>clientPort=2181</strong>（另两个文件中配置文件需修改此端口）<br><strong>quorumListenOnAllIPs=true</strong> （该参数设置为true，Zookeeper服务器将监听所有可用IP地址的连接）</p>
+<h2 id="在每个zookeeper文件下新建myid文件"><a href="#在每个zookeeper文件下新建myid文件" class="headerlink" title="在每个zookeeper文件下新建myid文件"></a>在每个zookeeper文件下新建myid文件</h2><p>Zookeeper的节点编号时数字类型，所以除了在配置文件中配置集群节点外，还需要在kafka/data/zookeeper目录下创建名为myid的文件，然后将编号配置在里面（Server.N里面的N要和myid中的编号保持一致）。<br>注意，myid里面只填一个数字，如1，此时对应server.1</p>
+<h2 id="kafka集群安装配置（server-properties配置）"><a href="#kafka集群安装配置（server-properties配置）" class="headerlink" title="kafka集群安装配置（server.properties配置）"></a>kafka集群安装配置（server.properties配置）</h2><p>以kafka01为例，在kafka01文件夹下server.properties中添加和修改以下内容：</p>
+<p><strong>broker.id=0</strong>  (其他两个重要修改为1和2或者其他不同数字)<br>delete.topic.enable=true<br>auto.create.topics.enable=true<br>listeners=PLAINTEXT://阿里云内网IP地址:9092 <strong>（每个server.properties中要设置这个listeners，不然每个都会默认为9092端口。<br>例如下一个配置为listeners=PLAINTEXT://阿里云内网IP地址:9093 ；advertised.listeners=PLAINTEXT://阿里云外网（公网IP地址）:9093）</strong><br>advertised.listeners=PLAINTEXT://阿里云外网（公网IP地址）:9092<br>num.partitions=1<br>default.replication.factor=3<br>min.insync.replicas=2</p>
+<p>zookeeper.connect=localhost:2181,localhost:2182,localhost:2183（设置Zookeeper地址，使用逗号分割配置多个地址，即Zookeeper集群的地址）</p>
+<p>log.dirs=/root/kafka01/data/kafka</p>
+<h2 id="zookeeper-启动"><a href="#zookeeper-启动" class="headerlink" title="zookeeper 启动"></a>zookeeper 启动</h2><p>启动相比配置部分比较简单，在每一台机器上使用kafka自带的脚本文件启动即可：<br>kafka/bin/zookeeper-server-start.sh kafka/config/zookeeper.properties</p>
+<h2 id="kafka启动"><a href="#kafka启动" class="headerlink" title="kafka启动"></a>kafka启动</h2><p>与Zookeeper集群启动类似，使用kafka/bin/kafka-server-start.sh脚本文件启动，命令如下：<br>    Kafka/bin/kafka-server-start.sh kafka/config/server.properties<br>    在三个文件里都是用该命令启动，如果没有报错就是启动成功了。<br>    （之前listeners没设置，所以kafka启动出错，每个启动时都默认9092端口）</p>
 
       </div>
     </div>
@@ -101,12 +101,12 @@
 <div class="lx-navigation">
 	<div class="lx-cover prev lx-cover-sm" style="background-image: url(//cdn.jsdelivr.net/npm/theme-lx@0.3.9/source/images/footer-l.jpeg)">
 		<div class="overlay"></div>
-		<a class="copy" href="/2020/06/07/firstone/">
+		<a class="copy" href="#">
 			<div class="display-t">
 				<div class="display-tc">
 					<div>
 						<span>Next</span>
-						<h3>kafka伪集...</h3>
+						<h3>No newer post</h3>
 					</div>
 				</div>
 			</div>
@@ -114,12 +114,12 @@
 	</div>
         <div class="lx-cover next lx-cover-sm" style="background-image: url(//cdn.jsdelivr.net/npm/theme-lx@0.3.9/source/images/footer-r.jpeg)">
 		<div class="overlay"></div>
-		<a class="copy" href="#">
+		<a class="copy" href="/2020/06/07/hello-world/">
 			<div class="display-t">
 				<div class="display-tc">
 					<div>
 						<span>Prev</span>
-						<h3>No older post</h3>
+						<h3>Hello W...</h3>
 					</div>
 				</div>
 			</div>
